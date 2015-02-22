@@ -22,7 +22,14 @@ Vagrant.configure(2) do |config|
     sudo -u vagrant -i -- wp core install --url=http://localhost/wordpress --title=ember-wp-green --admin_user=admin --admin_password=password --admin_email=noreply@gmail.com --path=/home/vagrant/wordpress
     sudo -u vagrant -i -- wp plugin install json-rest-api --path=/home/vagrant/wordpress
     sudo -u vagrant -i -- wp plugin activate json-rest-api --path=/home/vagrant/wordpress
-    sudo cp -a /home/vagrant/wordpress /var/www/wordpress
+    sudo -u vagrant -i -- wp rewrite structure '/%postname%/' --path=/home/vagrant/wordpress
+    sudo rm /etc/apache2/sites-enabled/000-default
+    sudo cp /vagrant/000-default /etc/apache2/sites-enabled/000-default
+    sudo cp /vagrant/.htaccess /home/vagrant/wordpress/.htaccess
+    sudo -u vagrant -i -- wp plugin install wordpress-importer --activate --path=/home/vagrant/wordpress
+    sudo -u vagrant -i -- wp import /vagrant/wp-test-data.xml --path=/home/vagrant/wordpress --authors=create
+    sudo a2enmod rewrite
+    sudo service apache2 restart
   SHELL
 
   config.vm.network "forwarded_port", guest: 80, host: 80

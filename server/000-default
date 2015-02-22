@@ -1,0 +1,12 @@
+<VirtualHost *:80>
+    ServerAdmin webmaster@localhost
+
+    DocumentRoot /var/www
+    Alias /wordpress /home/vagrant/wordpress
+    <Directory /var/www/>
+            Options Indexes FollowSymLinks MultiViews
+            AllowOverride All
+            Order allow,deny
+            allow from all
+    </Directory>
+</VirtualHost>
