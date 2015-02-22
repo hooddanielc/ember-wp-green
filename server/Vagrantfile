@@ -1,0 +1,29 @@
+Vagrant.configure(2) do |config|
+  config.vm.box = "hashicorp/precise32"
+  config.vm.synced_folder "../client/dist", "/var/www"
+
+  config.vm.provision "shell", inline: <<-SHELL
+    sudo apt-get -y update
+    sudo apt-get -y install apache2
+    echo mysql-server mysql-server/root_password password password | sudo debconf-set-selections
+    echo mysql-server mysql-server/root_password_again password password | sudo debconf-set-selections
+    sudo apt-get -y install mysql-server libapache2-mod-auth-mysql php5-mysql
+    sudo mysql_install_db
+    mysqladmin create wordpress -uroot -ppassword
+    sudo apt-get -y install php5 libapache2-mod-php5 php5-mcrypt
+    sudo apt-get -y install curl
+    curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+    sudo chmod +x wp-cli.phar
+    sudo mv wp-cli.phar /usr/local/bin/wp
+    mkdir ~/wordpress
+    cd ~/wordpress
+    sudo -u vagrant -i -- wp core download --path=/home/vagrant/wordpress
+    sudo -u vagrant -i -- wp core config --dbname=wordpress --dbuser=root --dbpass=password --path=/home/vagrant/wordpress
+    sudo -u vagrant -i -- wp core install --url=http://localhost/wordpress --title=ember-wp-green --admin_user=admin --admin_password=password --admin_email=noreply@gmail.com --path=/home/vagrant/wordpress
+    sudo -u vagrant -i -- wp plugin install json-rest-api --path=/home/vagrant/wordpress
+    sudo -u vagrant -i -- wp plugin activate json-rest-api --path=/home/vagrant/wordpress
+    sudo cp -a /home/vagrant/wordpress /var/www/wordpress
+  SHELL
+
+  config.vm.network "forwarded_port", guest: 80, host: 80
+end
