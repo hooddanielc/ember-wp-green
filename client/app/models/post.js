@@ -25,5 +25,5 @@ export default DS.Model.extend({
   featured_image: DS.attr(),
   tags: DS.hasMany('tag'),
   terms: DS.hasMany('terms'),
-  categories: DS.hasMany('category')
+  categories: DS.hasMany('category'),
 });
