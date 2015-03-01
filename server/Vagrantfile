@@ -1,6 +1,7 @@
 Vagrant.configure(2) do |config|
   config.vm.box = "hashicorp/precise32"
   config.vm.synced_folder "../client/dist", "/var/www"
+  config.vm.synced_folder "../wp-sexy-rest", "/home/vagrant/wp-sexy-rest"
 
   config.vm.provision "shell", inline: <<-SHELL
     sudo apt-get -y update
@@ -15,8 +16,6 @@ Vagrant.configure(2) do |config|
     curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
     sudo chmod +x wp-cli.phar
     sudo mv wp-cli.phar /usr/local/bin/wp
-    mkdir ~/wordpress
-    cd ~/wordpress
     sudo -u vagrant -i -- wp core download --path=/home/vagrant/wordpress
     sudo -u vagrant -i -- wp core config --dbname=wordpress --dbuser=root --dbpass=password --path=/home/vagrant/wordpress
     sudo -u vagrant -i -- wp core install --url=http://localhost/wordpress --title=ember-wp-green --admin_user=admin --admin_password=password --admin_email=noreply@gmail.com --path=/home/vagrant/wordpress
@@ -28,6 +27,8 @@ Vagrant.configure(2) do |config|
     sudo cp /vagrant/.htaccess /home/vagrant/wordpress/.htaccess
     sudo -u vagrant -i -- wp plugin install wordpress-importer --activate --path=/home/vagrant/wordpress
     sudo -u vagrant -i -- wp import /vagrant/wp-test-data.xml --path=/home/vagrant/wordpress --authors=create
+    ln -s /home/vagrant/wp-sexy-rest /home/vagrant/wordpress/wp-content/plugins/wp-sexy-rest
+    sudo -u vagrant -i -- wp plugin activate wp-sexy-rest --path=/home/vagrant/wordpress
     sudo a2enmod rewrite
     sudo service apache2 restart
   SHELL
