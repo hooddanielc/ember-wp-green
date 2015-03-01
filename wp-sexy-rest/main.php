@@ -18,7 +18,6 @@
     $wp->add_query_var('sexy_json_route');
 
     error_log("ANNITION");
-
   }
 
   add_action('init', 'sexy_json_api_init');
@@ -27,9 +26,6 @@
   // in case specific http query variable is
   // being used while modifying the content type
   function sexy_json_api_loaded() {
-
-    error_log('http file loaded');
-
     global $wp;
 
     // json encodes if this is an api request
@@ -42,7 +38,6 @@
 
   add_action('template_redirect', 'sexy_json_api_loaded');
   
-
   function add_vary_header($headers) {
       error_log('add_very_header');
       $headers['Vary'] = 'User-Agent';
@@ -50,5 +45,4 @@
   }
 
   add_filter('wp_headers', 'add_vary_header');
-
-  ?>
+?>
