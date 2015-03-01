@@ -11,7 +11,7 @@ cd <this-repository>/client
 ember build
 ```
 
-Then go ahead and run vagrant
+Then go ahead and run vagrant. Please not that you may have to configure OSX to allow to use port 80.
 
 ```
 cd <this-repository>/server

@@ -16,7 +16,9 @@
 
     global $wp;
     $wp->add_query_var('sexy_json_route');
-    error_log('workding?');
+
+    error_log("ANNITION");
+
   }
 
   add_action('init', 'sexy_json_api_init');
@@ -25,15 +27,28 @@
   // in case specific http query variable is
   // being used while modifying the content type
   function sexy_json_api_loaded() {
+
+    error_log('http file loaded');
+
     global $wp;
 
     // json encodes if this is an api request
     if (!empty($wp->query_vars['sexy_json_route'])) {
       header('Content-Type: application/json');
-      json_encode($wp->query_vars);
+      echo json_encode($wp->query_vars);
       die();
     }
   }
 
   add_action('template_redirect', 'sexy_json_api_loaded');
+  
+
+  function add_vary_header($headers) {
+      error_log('add_very_header');
+      $headers['Vary'] = 'User-Agent';
+      return $headers;
+  }
+
+  add_filter('wp_headers', 'add_vary_header');
+
   ?>
