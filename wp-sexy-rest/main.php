@@ -8,16 +8,20 @@
    * License: I don't have time for this
    */
 
+  // testing slim app framework
+  require_once dirname( __FILE__ ) . '/vendor/autoload.php';
+
+  function get_sexy_endpoint($endpoint = '') {
+    return '/sexy-json'.$endpoint.'/';
+  }
+
   // a test for adding query variables
   function sexy_json_api_init() {
-    // add some rewrite ruls
-    add_rewrite_rule( '^sexy-json/?$','index.php?sexy_json_route=/','top' );
-    add_rewrite_rule( '^sexy-json(.*)?','index.php?sexy_json_route=$matches[1]','top' );
+    add_rewrite_rule( '^sexy-json/?$','index.php?sexy_json_route=/', 'top');
+    add_rewrite_rule( '^sexy-json(.*)?','index.php?sexy_json_route=$matches[1]', 'top');
 
     global $wp;
     $wp->add_query_var('sexy_json_route');
-
-    error_log("ANNITION");
   }
 
   add_action('init', 'sexy_json_api_init');
@@ -28,21 +32,38 @@
   function sexy_json_api_loaded() {
     global $wp;
 
-    // json encodes if this is an api request
     if (!empty($wp->query_vars['sexy_json_route'])) {
-      header('Content-Type: application/json');
-      echo json_encode($wp->query_vars);
+      $app = new \Slim\Slim(array(
+        'debug' => true,
+        'log.enabled' => true
+      ));
+
+      // simple test for root endpoint
+      $app->get(get_sexy_endpoint(), function () {
+        echo json_encode(array('a', 'b', 'c', 'd'));
+      });
+
+      $app->get(get_sexy_endpoint('/posts'), function () {
+        $posts = get_posts();
+        echo json_encode($posts);
+      });
+
+      $app->get(get_sexy_endpoint('/posts/:id'), function ($id) {
+        $obj = array(
+          'post' => get_post($id),
+          'comments' => get_comments(array(
+            'post_ID' => $id
+          ))
+        );
+
+        echo json_encode($obj);
+      });
+
+      $app->response->headers->set('Content-Type', 'application/json');
+      $app->run();
       die();
     }
   }
 
-  add_action('template_redirect', 'sexy_json_api_loaded');
-  
-  function add_vary_header($headers) {
-      error_log('add_very_header');
-      $headers['Vary'] = 'User-Agent';
-      return $headers;
-  }
-
-  add_filter('wp_headers', 'add_vary_header');
+  add_action('template_redirect', 'sexy_json_api_loaded', -100);
 ?>
